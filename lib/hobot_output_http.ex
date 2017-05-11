@@ -3,8 +3,6 @@ defmodule Hobot.Output.HTTP do
   Writes out with using https.
   """
 
-  @wildcard "*"
-
   use GenServer
   require Logger
 
@@ -15,10 +13,7 @@ defmodule Hobot.Output.HTTP do
       {:ok, unexpected_data_structure} ->
         {:error, unexpected_data_structure}
       :error ->
-        case Map.has_key?(topic_map, @wildcard) do
-          true -> Map.fetch(topic_map, @wildcard)
-          false -> {:error, :no_match}
-        end
+        {:error, :no_match}
     end
   end
 
@@ -36,7 +31,8 @@ defmodule Hobot.Output.HTTP do
     case match(topic_map, topic) do
       {:ok, value} ->
         body_putted = put_in(value, [Access.at(1), Access.elem(3)], data)
-        apply(:httpc, :request, body_putted)
+        result = apply(:httpc, :request, body_putted)
+        Logger.debug inspect(result)
       {:error, :no_match} ->
         Logger.warn "no maching data found"
       {:error, unexpected_data_structure} ->
