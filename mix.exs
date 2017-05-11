@@ -33,7 +33,8 @@ defmodule Hobot.Output.HTTP.Mixfile do
   defp deps do
     [{:ex_doc, "~> 0.14", only: [:dev, :test], runtime: false},
      {:credo, "~> 0.7", only: [:dev, :test], runtime: false},
-     {:dialyxir, "~> 0.5", only: [:dev, :test], runtime: false}]
+     {:dialyxir, "~> 0.5", only: [:dev, :test], runtime: false},
+     {:hobot, "~> 0.1"}]
   end
 
   defp description do
