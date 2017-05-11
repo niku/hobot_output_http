@@ -12,11 +12,12 @@ defmodule Hobot.Output.HTTP.Application do
     children = [
       # Starts a worker by calling: Hobot.Output.HTTP.Worker.start_link(arg1, arg2, arg3)
       # worker(Hobot.Output.HTTP.Worker, [arg1, arg2, arg3]),
+      worker(Hobot.Output.HTTP, []),
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: Hobot.Output.HTTP.Supervisor]
+    opts = [strategy: :simple_one_for_one, name: Hobot.Output.HTTP.Supervisor]
     Supervisor.start_link(children, opts)
   end
 end
