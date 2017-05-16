@@ -52,7 +52,9 @@ defmodule Hobot.Output.HTTP do
       {:error, :no_match} ->
         Logger.warn "no maching data found"
       {:error, unexpected_data_structure} ->
-        Logger.warn "unexpected data strcture given: #{inspect unexpected_data_structure}"
+        Logger.warn fn ->
+          "unexpected data strcture given: #{inspect unexpected_data_structure}"
+        end
     end
     {:noreply, {topic_map, plugin_options}}
   end
