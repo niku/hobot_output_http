@@ -12,8 +12,6 @@ defmodule Hobot.Output.HTTP do
         {:ok, expected_data_structure}
       {:ok, unexpected_data_structure} ->
         {:error, unexpected_data_structure}
-      :error ->
-        {:error, :no_match}
     end
   end
 
@@ -49,8 +47,6 @@ defmodule Hobot.Output.HTTP do
           |> put_into_arguments(arguments_for_httpc_request)
           |> do_http_request
         Logger.debug inspect(result)
-      {:error, :no_match} ->
-        Logger.warn "no maching data found"
       {:error, unexpected_data_structure} ->
         Logger.warn fn ->
           "unexpected data strcture given: #{inspect unexpected_data_structure}"

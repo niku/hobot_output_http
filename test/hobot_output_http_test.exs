@@ -10,13 +10,6 @@ defmodule Hobot.Output.HTTPTest do
       assert Hobot.Output.HTTP.match(topic_map, "foo_topic") == {:ok, value}
     end
 
-    test "maching topic does not found and no wildcard given" do
-      value = [:post, {'https://example.com', [], [], "hello~"}, [], []]
-      topic_map = %{"foo_topic" => value}
-
-      assert Hobot.Output.HTTP.match(topic_map, "bar_topic") == {:error, :no_match}
-    end
-
     test "get unexpected data structure" do
       value = {}
       topic_map = %{"foo_topic" => value}
