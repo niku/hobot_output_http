@@ -7,10 +7,10 @@ defmodule Hobot.Output.HTTP do
   require Logger
 
   def match(topic_map, topic) do
-    case Map.fetch(topic_map, topic) do
-      {:ok, [_method, {_url, _headers, _content_type, _body}, _httpoptions, _options] = expected_data_structure} ->
+    case Map.fetch!(topic_map, topic) do
+      [_method, {_url, _headers, _content_type, _body}, _httpoptions, _options] = expected_data_structure ->
         {:ok, expected_data_structure}
-      {:ok, unexpected_data_structure} ->
+      unexpected_data_structure ->
         {:error, unexpected_data_structure}
     end
   end
