@@ -19,12 +19,12 @@ defmodule Hobot.Output.HTTP do
     Enum.reduce(filters, data, &(apply(&1, [&2])))
   end
 
-  def put_into_arguments(data, arguments) do
-    put_in(arguments, [Access.at(1), Access.elem(3)], data)
+  def build_argument(data, argument_builder, topic) do
+    apply(argument_builder, [topic, data])
   end
 
-  def do_http_request(arguments) do
-    apply(:httpc, :request, arguments)
+  def do_http_request(argument) do
+    apply(:httpc, :request, argument)
   end
 
   def start_link(topic_map, plugin_options \\ [], genserver_options \\ [])
@@ -38,18 +38,18 @@ defmodule Hobot.Output.HTTP do
   end
 
   def handle_cast({:broadcast, topic, data}, {topic_map, plugin_options}) do
-    case match(topic_map, topic) do
-      {:ok, arguments_for_httpc_request} ->
+    case Map.fetch(topic_map, topic) do
+      {:ok, argument_builder} ->
         filters = Keyword.get(plugin_options, :filters, [])
         result =
           data
           |> pass_through_filters(filters)
-          |> put_into_arguments(arguments_for_httpc_request)
+          |> build_argument(argument_builder, topic)
           |> do_http_request
         Logger.debug inspect(result)
-      {:error, unexpected_data_structure} ->
+      :error ->
         Logger.warn fn ->
-          "unexpected data strcture given: #{inspect unexpected_data_structure}"
+          "Matching topic does not find. topic_map: #{inspect topic_map}, data: #{data}"
         end
     end
     {:noreply, {topic_map, plugin_options}}
