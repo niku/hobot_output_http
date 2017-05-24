@@ -15,18 +15,6 @@ defmodule Hobot.Output.HTTP do
     end
   end
 
-  def pass_through_filters(data, filters) when is_list(filters) do
-    Enum.reduce(filters, data, &(apply(&1, [&2])))
-  end
-
-  def build_argument(data, argument_builder, topic) do
-    apply(argument_builder, [topic, data])
-  end
-
-  def do_http_request(argument) do
-    apply(:httpc, :request, argument)
-  end
-
   def start_link(topic_map, plugin_options \\ [], genserver_options \\ [])
   def start_link(topic_map, plugin_options, genserver_options) when is_map(topic_map) do
     GenServer.start_link(__MODULE__, {topic_map, plugin_options}, genserver_options)
@@ -39,17 +27,17 @@ defmodule Hobot.Output.HTTP do
 
   def handle_cast({:broadcast, topic, data}, {topic_map, plugin_options}) do
     case Map.fetch(topic_map, topic) do
-      {:ok, argument_builder} ->
+      {:ok, arguments_builder} ->
         filters = Keyword.get(plugin_options, :filters, [])
-        result =
-          data
-          |> pass_through_filters(filters)
-          |> build_argument(argument_builder, topic)
-          |> do_http_request
-        Logger.debug inspect(result)
-      :error ->
-        Logger.warn fn ->
-          "Matching topic does not find. topic_map: #{inspect topic_map}, data: #{data}"
+        case Enum.reduce_while(filters, data, &(apply(&1, [&2]))) do
+          filtered_data when is_binary(filtered_data) ->
+            httpc_request_arguments = apply(arguments_builder, [topic, filtered_data])
+            result = apply(:httpc, :request, httpc_request_arguments)
+            Logger.debug inspect(result)
+          nil ->
+            Logger.info fn ->
+              "Ignores data due to filtered value is `nil`. The data are: #{inspect data}"
+            end
         end
     end
     {:noreply, {topic_map, plugin_options}}
